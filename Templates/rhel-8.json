@@ -1,0 +1,46 @@
+{
+  "variables": {
+    "client_id": "{{env `AZURE_CLIENT_ID`}}",
+    "client_secret": "{{env `AZURE_SECRET`}}",
+    "subscription_id": "{{env `SubID`}}",
+    "tenant_id": "{{env `TenantID`}}",
+    "region": "{{env `Region`}}",
+    "rsn": "{{env `RSN`}}",
+    "image_name_prefix": "Golden-RHEL-8-Image"
+  },
+  "builders": [
+    {
+      "azure_tags": {
+        "task": "Image deployment",
+        "team": "Anycloud"
+      },
+      "client_id": "{{user `client_id`}}",
+      "client_secret": "{{user `client_secret`}}",
+      "image_offer": "RHEL",
+      "image_publisher": "RedHat",
+      "image_sku": "83-gen2",
+      "location": "{{user `region`}}",
+      "managed_image_name": "{{user `image_name_prefix`}}-{{isotime \"2006-01-02\"}}",
+      "managed_image_resource_group_name": "{{user `rsh`}}",
+      "os_type": "Linux",
+      "subscription_id": "{{user `subscription_id`}}",
+      "tenant_id": "{{user `tenant_id`}}",
+      "type": "azure-arm",
+      "vm_size": "Standard_DS2_v2"
+    }
+  ],
+  "provisioners": [
+    {
+      "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'",
+      "inline": [
+        "yum update -y",
+        "echo 'updated'",
+        "package-cleanup --oldkernels --count=1 -y",
+        "echo 'package cleanup'"
+      ],
+      "inline_shebang": "/bin/sh -x",
+      "type": "shell"
+    }
+  ]
+}
+

@@ -1,0 +1,81 @@
+################################################################
+# Azure CI/CD pipelines                                        #
+# Auto trigger deployment on develop branch                    #
+# Manually Deploy via feature or master/main branches          #
+################################################################
+
+trigger:
+  - develop
+
+resources:
+  - repo: self
+
+variables:
+  # Environment specific variables
+  - ${{ if and(ne(variables['Build.SourceBranch'], 'refs/heads/main'), ne(variables['Build.SourceBranch'], 'refs/heads/master')) }}:
+    - template: dev.yml
+  - ${{ if or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.SourceBranch'], 'refs/heads/master')) }}:
+    - template: prod.yml
+
+  # Common variables
+  # Resource group name
+  - name: RSN
+    value: Azure-pipeline-builder
+
+# active only when using own agent pool
+# pool:
+#   name: Azure-agent-pool-with-vm-scale-set
+
+stages:
+    - stage: Packer_Build_rhel_8
+      dependsOn: [] # run in parallel
+      displayName: Packer_Build_rhel_8
+      jobs:
+      - job: Packer_Build_rhel_8
+        displayName: Packer_Build_rhel_8
+        steps:
+        - task: AzureKeyVault@1
+          inputs:
+            azureSubscription: '$(SC)'
+            KeyVaultName: '$(KeyVault)'
+            SecretsFilter: '*'
+            RunAsPreJob: true
+        - task: PackerBuild@1
+          inputs:
+            templateType: 'custom'
+            ConnectedServiceName: '$(SC)'
+            customTemplateLocation: 'Templates/rhel-8.json'
+            packerVersion: 1.7.2
+          env:
+            AZURE_CLIENT_ID: $(Azure-Client-Id)
+            AZURE_CLIENT_SECRET: $(Azure-Client-Secret)
+            TenantID: $(TenantID)
+            SubID: $(SubID)
+            Region: $(Region)
+            RSN: $(RSN)
+    - stage: Packer_Build_Windows_2019
+      dependsOn: [] # run in parallel
+      displayName: Packer_Build_Windows_2019
+      jobs:
+      - job: Packer_Build_Windows_2019
+        displayName: Packer_Build_Windows_2019
+        steps:
+        - task: AzureKeyVault@1
+          inputs:
+            azureSubscription: '$(SC)'
+            KeyVaultName: '$(KeyVault)'
+            SecretsFilter: '*'
+            RunAsPreJob: true
+        - task: PackerBuild@1
+          inputs:
+            templateType: 'custom'
+            ConnectedServiceName: '$(SC)'
+            customTemplateLocation: 'Templates/windows-2019.json'
+            packerVersion: 1.7.2
+          env:
+            AZURE_CLIENT_ID: $(Azure-Client-Id)
+            AZURE_CLIENT_SECRET: $(Azure-Client-Secret)
+            TenantID: $(TenantID)
+            SubID: $(SubID)
+            Region: $(Region)
+            RSN: $(RSN)

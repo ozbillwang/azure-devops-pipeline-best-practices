@@ -1,0 +1,11 @@
+#### Azure CI/CD Pipeline Template ####
+#### Continuous Delivery (CI) is in develop branch ####
+#### Manually Deploy via feature or master/main branches ####
+variables:
+    Env: prod
+    Region: Australia East
+    SubID: 91d19fb2-e4d6-4eeb-af39-272d354b175c ## Subscription ID
+    TenantID: ab642767-5627-47c8-8bce-6777b746231f ## Tenant ID
+    SC: Service connection (DEV) ## Service Connection
+    KeyVault: keyvault91d19fb2 ## KeyVaul
+    StorageAccount: storageaccount91d19fb2 ## Storage Account
