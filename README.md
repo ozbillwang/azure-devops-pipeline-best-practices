@@ -1,4 +1,4 @@
-# azure-pipeline-templates
+# Azure DevOps Pipeline Best Practices 🌐
 
 A real sample with best practices on how you can quickly manage CICD pipeline with Azure DevOps Pipeline
 
